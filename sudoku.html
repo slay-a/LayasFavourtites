@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sudoku Challenge</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Coin Display (preserves coin points from bike.html) -->
+  <output id="scoreOutput" style="position: absolute; top: 10px; right: 10px; font-size: 24px; background: #fff; padding: 5px 10px; border-radius: 5px;">
+    Coins: <span id="coinValue">0</span> <bdi>💰</bdi>
+  </output>
+  
+  <div class="sudoku-container">
+    <h2>Solve the Mini Sudoku</h2>
+    <form id="sudokuForm">
+      <div class="sudoku-grid">
+        <!-- Row 0 -->
+        <input type="text" maxlength="1" class="cell" id="cell0" value="1" readonly>
+        <input type="text" maxlength="1" class="cell" id="cell1" placeholder=" ">
+        <input type="text" maxlength="1" class="cell" id="cell2" value="3" readonly>
+        <input type="text" maxlength="1" class="cell" id="cell3" placeholder=" ">
+        <!-- Row 1 -->
+        <input type="text" maxlength="1" class="cell" id="cell4" placeholder=" ">
+        <input type="text" maxlength="1" class="cell" id="cell5" value="4" readonly>
+        <input type="text" maxlength="1" class="cell" id="cell6" placeholder=" ">
+        <input type="text" maxlength="1" class="cell" id="cell7" value="2" readonly>
+        <!-- Row 2 -->
+        <input type="text" maxlength="1" class="cell" id="cell8" value="2" readonly>
+        <input type="text" maxlength="1" class="cell" id="cell9" placeholder=" ">
+        <input type="text" maxlength="1" class="cell" id="cell10" value="4" readonly>
+        <input type="text" maxlength="1" class="cell" id="cell11" placeholder=" ">
+        <!-- Row 3 -->
+        <input type="text" maxlength="1" class="cell" id="cell12" placeholder=" ">
+        <input type="text" maxlength="1" class="cell" id="cell13" value="3" readonly>
+        <input type="text" maxlength="1" class="cell" id="cell14" placeholder=" ">
+        <input type="text" maxlength="1" class="cell" id="cell15" value="1" readonly>
+      </div>
+      <button type="submit">Submit</button>
+    </form>
+    <output id="sudokuOutput" style="display:block; margin-top:10px; font-size:18px;"></output>
+  </div>
+  
+  <!-- Game Over Overlay for Sudoku -->
+  <div id="sudokuGameOverOverlay">
+    <h2>Game Over</h2>
+    <button id="sudokuReplayButton" enterkeyhint="go">Replay</button>
+    <div id="sudokuCountdown"></div>
+  </div>
+  
+  <script>
+    // Retrieve coin score from localStorage (set by bike.html)
+    let coinScore = localStorage.getItem("coinScore") || 0;
+    document.getElementById("coinValue").textContent = coinScore;
+    
+    // Internal solution for the 4x4 sudoku puzzle:
+    // Solution: [1,2,3,4, 3,4,1,2, 2,1,4,3, 4,3,2,1]
+    // The puzzle given below has only a few prefilled numbers.
+    const solution = [
+      "1", "2", "3", "4",
+      "3", "4", "1", "2",
+      "2", "1", "4", "3",
+      "4", "3", "2", "1"
+    ];
+    
+    let attemptsLeft = 7;
+    
+    const sudokuForm = document.getElementById("sudokuForm");
+    const sudokuOutput = document.getElementById("sudokuOutput");
+    const gameOverOverlay = document.getElementById("sudokuGameOverOverlay");
+    const replayButton = document.getElementById("sudokuReplayButton");
+    const countdownEl = document.getElementById("sudokuCountdown");
+    
+    // On form submission, check user inputs
+    sudokuForm.addEventListener("submit", function(e) {
+      e.preventDefault();
+      let userSolution = [];
+      // Loop through the 16 cells
+      for (let i = 0; i < 16; i++) {
+        let cell = document.getElementById("cell" + i);
+        userSolution.push(cell.value.trim());
+      }
+      
+      // Check if the user's solution matches the expected solution
+      let isCorrect = userSolution.every((val, idx) => val === solution[idx]);
+      
+      if (isCorrect) {
+        sudokuOutput.textContent = "Correct! Proceeding to the swim challenge...";
+        setTimeout(() => {
+          window.location.href = "swim.html";
+        }, 2000);
+      } else {
+        attemptsLeft--;
+        if (attemptsLeft > 0) {
+          sudokuOutput.textContent = `Incorrect, ${attemptsLeft} attempt(s) left. Please try again.`;
+        } else {
+          sudokuOutput.textContent = "";
+          gameOver();
+        }
+      }
+    });
+    
+    function gameOver() {
+      gameOverOverlay.style.display = "flex";
+    }
+    
+    // Replay and countdown for Sudoku game over
+    function startCountdown() {
+      let count = 3;
+      countdownEl.textContent = count;
+      const countdownInterval = setInterval(() => {
+        count--;
+        if (count > 0) {
+          countdownEl.textContent = count;
+        } else {
+          clearInterval(countdownInterval);
+          window.location.reload();
+        }
+      }, 1000);
+    }
+    
+    replayButton.addEventListener("click", function() {
+      replayButton.style.display = "none";
+      startCountdown();
+    });
+  </script>
+</body>
+</html>

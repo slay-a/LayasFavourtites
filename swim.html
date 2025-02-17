@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Swim Challenge</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Coin Display -->
+  <output id="scoreOutput">Coins: <span id="coinValue">0</span> <bdi>💰</bdi></output>
+  
+  <div class="swim-container">
+    <!-- Water element always visible at the bottom -->
+    <div class="water"></div>
+    <!-- The monkey at the water surface -->
+    <div class="monkey-swim"></div>
+    <!-- Template for obstacles (bananas) -->
+    <template id="obstacle-template">
+      <div class="obstacle">🍌</div>
+    </template>
+  </div>
+  
+  <button id="finishSwim">Finish Swim</button>
+  
+  <!-- Game Over Overlay -->
+  <div id="swimGameOverOverlay">
+    <h2>Game Over</h2>
+    <button id="swimReplayButton" enterkeyhint="go">Replay</button>
+    <div id="swimCountdown"></div>
+  </div>
+  
+  <script>
+    let gameActive = true;
+    let bananaPasses = 0;
+    const requiredPasses = 4;
+    
+    const swimContainer = document.querySelector('.swim-container');
+    const monkey = document.querySelector('.monkey-swim');
+    const finishSwimBtn = document.getElementById('finishSwim');
+    const obstacleTemplate = document.getElementById('obstacle-template');
+    const gameOverOverlay = document.getElementById('swimGameOverOverlay');
+    const replayButton = document.getElementById('swimReplayButton');
+    const countdownEl = document.getElementById('swimCountdown');
+    
+    // Retrieve and display coin score from localStorage
+    let coinScore = parseInt(localStorage.getItem("coinScore")) || 0;
+    const coinDisplay = document.getElementById("coinValue");
+    coinDisplay.textContent = coinScore;
+    
+    // Function to update coins and save to localStorage
+    function updateCoins(amount) {
+      coinScore += amount;
+      coinDisplay.textContent = coinScore;
+      localStorage.setItem("coinScore", coinScore);
+    }
+    
+    // --- Dive Mechanism ---
+    // When down arrow is pressed, trigger a one-time dive (500ms duration)
+    document.addEventListener('keydown', function(event) {
+      if (event.key === "ArrowDown") {
+        event.preventDefault(); // Prevent default scrolling
+        if (!monkey.classList.contains('dive')) {
+          monkey.classList.add('dive');
+          setTimeout(() => {
+            monkey.classList.remove('dive');
+          }, 500);
+        }
+      }
+    });
+    
+    // --- Obstacle Spawning ---
+    function spawnObstacle() {
+      const clone = obstacleTemplate.content.cloneNode(true);
+      const obstacle = clone.querySelector('.obstacle');
+      // Start off-screen to the right
+      obstacle.style.left = '100%';
+      // Position the banana at the water surface level (aligned with monkey's default position)
+      obstacle.style.bottom = '100px';
+      // Slow bananas: animation duration between 7 and 10 seconds
+      obstacle.style.animationDuration = (7 + Math.random() * 3) + 's';
+      
+      swimContainer.appendChild(obstacle);
+      
+      // When the banana finishes its animation (passes offscreen), count as a safe pass if not already processed.
+      obstacle.addEventListener('animationend', function() {
+        if (!obstacle.dataset.processed) {
+          obstacle.dataset.processed = "true";
+          bananaPasses++;
+          updateCoins(500);
+          if (bananaPasses >= requiredPasses) {
+            finishSwim();
+          }
+        }
+        obstacle.remove();
+      });
+    }
+    let obstacleInterval = setInterval(spawnObstacle, 3000);
+    
+    // --- Collision Detection ---
+    function collisionCheck() {
+      if (!gameActive) return;
+      const monkeyRect = monkey.getBoundingClientRect();
+      const monkeyCenter = monkeyRect.left + monkeyRect.width / 2;
+      document.querySelectorAll('.obstacle').forEach(obstacle => {
+        if (obstacle.dataset.processed) return;
+        const obsRect = obstacle.getBoundingClientRect();
+        const obsCenter = obsRect.left + obsRect.width / 2;
+        const horizontalDistance = Math.abs(monkeyCenter - obsCenter);
+        // If obstacle is near (within 30px)...
+        if (horizontalDistance < 30) {
+          if (monkey.classList.contains('dive')) {
+            // Safe pass when diving: mark obstacle, count pass, update coins.
+            obstacle.dataset.processed = "true";
+            bananaPasses++;
+            updateCoins(500);
+            obstacle.remove();
+            if (bananaPasses >= requiredPasses) {
+              finishSwim();
+            }
+          } else {
+            // Not diving and collision occurs: game over.
+            gameOver();
+          }
+        }
+      });
+    }
+    let collisionInterval = setInterval(collisionCheck, 50);
+    
+    // --- Finish Swim ---
+    function finishSwim() {
+      if (!gameActive) return;
+      gameActive = false;
+      clearInterval(obstacleInterval);
+      clearInterval(collisionInterval);
+      window.location.href = "reward.html";
+    }
+    finishSwimBtn.addEventListener('click', function(){
+      if (gameActive) finishSwim();
+    });
+    
+    // --- Game Over & Replay ---
+    function gameOver() {
+      if (!gameActive) return;
+      gameActive = false;
+      clearInterval(obstacleInterval);
+      clearInterval(collisionInterval);
+      gameOverOverlay.style.display = 'flex';
+    }
+    function startCountdown() {
+      let count = 3;
+      countdownEl.textContent = count;
+      const countdownInterval = setInterval(() => {
+        count--;
+        if (count > 0) {
+          countdownEl.textContent = count;
+        } else {
+          clearInterval(countdownInterval);
+          window.location.reload();
+        }
+      }, 1000);
+    }
+    replayButton.addEventListener('click', function(){
+      replayButton.style.display = 'none';
+      startCountdown();
+    });
+  </script>
+</body>
+</html>

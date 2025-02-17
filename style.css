@@ -1,0 +1,281 @@
+/* General styles */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f0f0f0;
+    text-align: center;
+  }
+  
+  button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  
+  /* Score Display Styles */
+  #scoreOutput {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    background: #fff;
+    padding: 5px 10px;
+    border-radius: 5px;
+    z-index: 10;
+  }
+  
+  /* Bike Challenge Container */
+  .bike-container {
+    position: relative;
+    width: 100%;
+    height: 300px;
+    background: #65b13b; /* Green background matching monkey.gif */
+    overflow: hidden;
+  }
+  
+  /* Bike Player: The element controlled by arrow keys */
+  .bike-player {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  
+  /* The Monkey (using a walking monkey gif) */
+  .monkey-bike {
+    width: 80px;
+    height: 80px;
+    background: url('monkey.gif') no-repeat center/contain;
+  }
+  
+  /* Jump animation: lifts the monkey up and then brings it down */
+  @keyframes jump {
+    0%   { transform: translateY(0); }
+    50%  { transform: translateY(-50px); }
+    100% { transform: translateY(0); }
+  }
+  
+  .monkey-bike.jump {
+    animation: jump 0.5s ease-out;
+  }
+  
+  /* Obstacle Styles and Animation */
+  .obstacle {
+    position: absolute;
+    bottom: 20px;
+    width: 50px;
+    height: 50px;
+    /* Use flex to center the mountain emoji */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation-name: obstacleMove;
+    animation-timing-function: linear;
+  }
+  
+  @keyframes obstacleMove {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      /* Move the obstacle completely off-screen to the left */
+      transform: translateX(-110vw);
+    }
+  }
+  
+  /* Game Over Overlay */
+  #gameOverOverlay {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    color: #fff;
+    z-index: 100;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  #gameOverOverlay h2 {
+    margin: 0 0 20px;
+  }
+  #countdown {
+    font-size: 48px;
+    margin-top: 20px;
+  }
+  
+  /* --- Additional styles for other game pages (if needed) --- */
+  /* Sudoku Challenge styles */
+
+/* Sudoku Challenge styles */
+.sudoku-container {
+    padding: 20px;
+    margin-top: 60px; /* leave room for coin display */
+  }
+  .sudoku-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 50px);
+    grid-gap: 5px;
+    justify-content: center;
+    margin-bottom: 10px;
+  }
+  .cell {
+    width: 50px;
+    height: 50px;
+    text-align: center;
+    font-size: 18px;
+  }
+  
+  /* Game Over Overlay for Sudoku */
+  #sudokuGameOverOverlay {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    color: #fff;
+    z-index: 100;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  #sudokuGameOverOverlay h2 {
+    margin: 0 0 20px;
+  }
+  #sudokuCountdown {
+    font-size: 48px;
+    margin-top: 20px;
+  }
+  
+  /* Swim Challenge styles */
+/* Swim Challenge styles */
+.swim-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    /* Background above water (light blue) */
+    background-color: #00bfff;
+    overflow: hidden;
+  }
+  
+  /* Water element fixed at the bottom (100px tall) */
+  .water {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100px;
+    background: url('water.gif') repeat-x bottom;
+    background-size: auto 100px;
+    z-index: 1;
+  }
+  
+  /* The monkey at the water surface */
+  .monkey-swim {
+    position: absolute;
+    bottom: 100px; /* Aligned with water surface */
+    left: 10%;
+    width: 60px;
+    height: 60px;
+    background: url('monkey-swim.gif') no-repeat center/contain;
+    background-size: contain;
+    transition: bottom 0.3s ease, opacity 0.3s ease;
+    z-index: 2;
+    opacity: 1;
+  }
+  
+  /* When diving, monkey moves down into the water and fades out */
+  .monkey-swim.dive {
+    bottom: 0;
+    opacity: 0;
+  }
+  
+  /* Obstacle style: banana emoji */
+  .obstacle {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    z-index: 3;
+    animation-name: obstacleMove;
+    animation-timing-function: linear;
+  }
+  
+  /* Keyframe animation for obstacle movement */
+  @keyframes obstacleMove {
+    from { transform: translateX(0); }
+    to { transform: translateX(-110vw); }
+  }
+  
+  /* Coin Display Styles */
+  #scoreOutput {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    background: #fff;
+    padding: 5px 10px;
+    border-radius: 5px;
+    z-index: 9999;
+  }
+  
+  /* Game Over Overlay for Swim Challenge */
+  #swimGameOverOverlay {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    color: #fff;
+    z-index: 100;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  #swimGameOverOverlay h2 {
+    margin: 0 0 20px;
+  }
+  #swimCountdown {
+    font-size: 48px;
+    margin-top: 20px;
+  }
+  
+  
+  .banana {
+    position: absolute;
+    bottom: 50%;
+    left: 60%;
+    width: 40px;
+    height: 40px;
+    background: url('banana.png') no-repeat center/contain;
+  }
+ /* Reward Page Styles */
+.reward-container {
+    width: 100vw;
+    height: 100vh;
+    background: url('beach.jpg') no-repeat center center/cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .message-banner {
+    background: rgba(0, 0, 0, 0.5);
+    padding: 20px 30px;
+    border-radius: 10px;
+    text-align: center;
+    color: #fff;
+    font-size: 2rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  }
+  
+  

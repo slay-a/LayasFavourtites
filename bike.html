@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bike Challenge</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Score Display using an output element with a bdi for the coin emoji -->
+  <output id="scoreOutput">Coins: 0 <bdi>💰</bdi></output>
+  
+  <div class="bike-container">
+    <!-- Bike Player: The element controlled by arrow keys -->
+    <div class="bike-player">
+      <div class="monkey-bike"></div>
+    </div>
+    <!-- Template for obstacles (to be cloned dynamically) -->
+    <template id="obstacle-template">
+      <div class="obstacle"></div>
+    </template>
+  </div>
+  
+  <!-- Game Over Overlay -->
+  <div id="gameOverOverlay">
+    <h2>Game Over</h2>
+    <button id="replayButton" enterkeyhint="go">Replay</button>
+    <div id="countdown"></div>
+  </div>
+  
+  <script>
+    // Global variables
+    let score = 0;
+    let obstaclesCleared = 0;
+    let obstacleInterval;
+    let collisionInterval;
+    let gameActive = true;
+    
+    const bikePlayer = document.querySelector('.bike-player');
+    const monkey = document.querySelector('.monkey-bike');
+    const scoreOutput = document.getElementById('scoreOutput');
+    const gameOverOverlay = document.getElementById('gameOverOverlay');
+    const countdownEl = document.getElementById('countdown');
+    const replayButton = document.getElementById('replayButton');
+    
+    // --- Movement & Jumping ---
+    document.addEventListener('keydown', function(event) {
+      // Left/right movement for bike-player
+      let currentLeft = bikePlayer.offsetLeft;
+      const moveAmount = 20;
+      if (event.key === "ArrowLeft") {
+        bikePlayer.style.left = (currentLeft - moveAmount) + "px";
+      } else if (event.key === "ArrowRight") {
+        bikePlayer.style.left = (currentLeft + moveAmount) + "px";
+      }
+      // Jump only when up arrow is pressed
+      else if (event.key === "ArrowUp") {
+        if (!monkey.classList.contains('jump')) {
+          monkey.classList.add('jump');
+          // Remove jump class after 500ms
+          setTimeout(() => { monkey.classList.remove('jump'); }, 500);
+        }
+      }
+    });
+    
+    // --- Obstacle Spawning ---
+    function spawnObstacle() {
+      const template = document.getElementById('obstacle-template');
+      const clone = template.content.cloneNode(true);
+      const obstacle = clone.querySelector('.obstacle');
+      
+      // Use mountain emoji instead of red block
+      obstacle.textContent = "🏔️";
+      obstacle.style.fontSize = "40px";
+      obstacle.style.textAlign = "center";
+      
+      // Start off-screen to the right at the same vertical level as the monkey
+      obstacle.style.left = '100%';
+      obstacle.style.bottom = '20px';
+      // Slow down obstacles: animation duration between 5 and 7 seconds
+      obstacle.style.animationDuration = (5 + Math.random() * 2) + 's';
+      
+      document.querySelector('.bike-container').appendChild(obstacle);
+      
+      // When animation ends, if the obstacle wasn't cleared, it's a miss (game over)
+      obstacle.addEventListener('animationend', function() {
+        if (!obstacle.dataset.processed) {
+          gameOver();
+        }
+        obstacle.remove();
+      });
+    }
+    
+    // Start spawning obstacles every 2 seconds
+    obstacleInterval = setInterval(spawnObstacle, 2000);
+    
+    // --- Collision & Score Checking ---
+    function updateScoreDisplay() {
+      scoreOutput.innerHTML = `Coins: ${score} <bdi>💰</bdi>`;
+    }
+    
+    function checkWinCondition() {
+      if (obstaclesCleared >= 7) {
+        clearInterval(obstacleInterval);
+        clearInterval(collisionInterval);
+        setTimeout(() => {
+          window.location.href = "sudoku.html";
+        }, 1000);
+      }
+    }
+    
+    function gameOver() {
+      if (!gameActive) return;
+      gameActive = false;
+      clearInterval(obstacleInterval);
+      clearInterval(collisionInterval);
+      gameOverOverlay.style.display = 'flex';
+    }
+    
+    // Collision detection: check every 50ms
+    collisionInterval = setInterval(() => {
+      const monkeyRect = monkey.getBoundingClientRect();
+      const monkeyCenter = monkeyRect.left + monkeyRect.width / 2;
+      
+      document.querySelectorAll('.obstacle').forEach(obstacle => {
+        if (obstacle.dataset.processed) return;
+        const obsRect = obstacle.getBoundingClientRect();
+        const obsCenter = obsRect.left + obsRect.width / 2;
+        const horizontalDistance = Math.abs(monkeyCenter - obsCenter);
+        
+        // Only clear obstacle if it is near the monkey (within 50px)
+        if (horizontalDistance < 50) {
+          if (monkey.classList.contains('jump')) {
+            obstacle.dataset.processed = "true";
+            score += 500;
+            obstaclesCleared++;
+            updateScoreDisplay();
+            obstacle.remove();
+            checkWinCondition();
+          } else {
+            gameOver();
+          }
+        }
+      });
+    }, 50);
+    
+    // --- Replay & Countdown ---
+    function startCountdown() {
+      let count = 3;
+      countdownEl.textContent = count;
+      const countdownInterval = setInterval(() => {
+        count--;
+        if (count > 0) {
+          countdownEl.textContent = count;
+        } else {
+          clearInterval(countdownInterval);
+          window.location.reload();
+        }
+      }, 1000);
+    }
+    
+    replayButton.addEventListener('click', function() {
+      replayButton.style.display = 'none';
+      startCountdown();
+    });
+  </script>
+</body>
+</html>
